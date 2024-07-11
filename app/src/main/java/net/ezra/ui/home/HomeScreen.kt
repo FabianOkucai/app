@@ -1,5 +1,17 @@
 package net.ezra.ui.home
 
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +55,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material3.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
@@ -66,8 +82,22 @@ import net.ezra.navigation.ROUTE_VIEW_PRODUCTS
 
 
 
+data class Screen(val title: String, val icon: Int)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ResourceAsColor")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavHostController) {
+
+
+    var isDrawerOpen by remember { mutableStateOf(false) }
+
+    val callLauncher: ManagedActivityResultLauncher<Intent, ActivityResult> =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { _ ->
+
+        }
+
+
+
 
     Box(
         modifier = Modifier

@@ -193,7 +193,7 @@ fun InsertProductScreen(navController: NavController, onProductAdded: () -> Unit
                 Text("Fact Rate is required", color = Color.Red)
             }
 
-            if (!isUploading) {
+
                 Button(
                     onClick = {
                         productNameError = productName.isBlank()
@@ -212,7 +212,6 @@ fun InsertProductScreen(navController: NavController, onProductAdded: () -> Unit
                                 productQuantity,
                                 productPrice.toDouble(),
                                 productImageUri,
-                                onUploadComplete = { isUploading = false }
                             )
                         }
                     },
@@ -229,15 +228,9 @@ fun InsertProductScreen(navController: NavController, onProductAdded: () -> Unit
                         color = Color.White,
                     )
                 }
-            }
 
-            if (isUploading) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                    Text("Uploading...", modifier = Modifier.padding(start = 8.dp))
-                }
-            }
+
+
         }
     }
 
@@ -319,9 +312,10 @@ private fun addProductToFirestore(
     productQuantity: String,
     productPrice: Double,
     productImageUri: Uri?,
-    onUploadComplete: () -> Unit
 ) {
-    if (productImageUri == null) return
+    if (productImageUri == null){
+        return
+    }
 
     val productId = UUID.randomUUID().toString()
     val firestore = Firebase.firestore
@@ -333,27 +327,23 @@ private fun addProductToFirestore(
         "imageUrl" to ""
     )
 
-    firestore.collection("fact").document(productId)
+    firestore.collection("products").document(productId)
         .set(productData)
         .addOnSuccessListener {
             uploadImageToStorage(productId, productImageUri) { imageUrl ->
-                firestore.collection("fact").document(productId)
+                firestore.collection("productse").document(productId)
                     .update("imageUrl", imageUrl)
                     .addOnSuccessListener {
                         Toast.makeText(navController.context, "Fact added successfully!", Toast.LENGTH_SHORT).show()
-                        navController.navigate(ROUTE_VIEW_PRODUCTS)
+                        navController.navigate(ROUTE_HOME)
                         onProductAdded()
-                        onUploadComplete()
                     }
                     .addOnFailureListener { e ->
-                        Toast.makeText(navController.context, "Failed to update fact image URL.", Toast.LENGTH_SHORT).show()
-                        onUploadComplete()
                     }
             }
         }
         .addOnFailureListener { e ->
-            Toast.makeText(navController.context, "Failed to add fact.", Toast.LENGTH_SHORT).show()
-            onUploadComplete()
+
         }
 }
 
@@ -364,20 +354,19 @@ private fun uploadImageToStorage(productId: String, imageUri: Uri?, onSuccess: (
     }
 
     val storageRef = Firebase.storage.reference
-    val imagesRef = storageRef.child("fact/$productId.jpg")
+    val imagesRef = storageRef.child("products/$productId.jpg")
 
     imagesRef.putFile(imageUri)
-        .addOnSuccessListener {
+        .addOnSuccessListener { taskSnapshot ->
             imagesRef.downloadUrl
                 .addOnSuccessListener { uri ->
                     onSuccess(uri.toString())
                 }
                 .addOnFailureListener {
-                    onSuccess("")
+                    // Handle failure to get download URL
                 }
         }
         .addOnFailureListener {
-            onSuccess("")
+            // Handle failure to upload image
         }
 }
-

@@ -197,7 +197,7 @@ fun ProductListItem(product: Product, onItemClick: (String) -> Unit) {
 private suspend fun fetchProducts(onSuccess: (List<Product>) -> Unit, onError: () -> Unit) {
     val firestore = Firebase.firestore
     try {
-        val snapshot = firestore.collection("facts").get().await()
+        val snapshot = firestore.collection("products").get().await()
         val productList = snapshot.documents.mapNotNull { doc ->
             val product = doc.toObject<Product>()
             product?.id = doc.id
@@ -211,7 +211,7 @@ private suspend fun fetchProducts(onSuccess: (List<Product>) -> Unit, onError: (
 
 suspend fun fetchProduct(productId: String, onSuccess: (Product?) -> Unit) {
     val firestore = Firebase.firestore
-    val docRef = firestore.collection("facts").document(productId)
+    val docRef = firestore.collection("products").document(productId)
     val snapshot = docRef.get().await()
     val product = snapshot.toObject<Product>()
     onSuccess(product)

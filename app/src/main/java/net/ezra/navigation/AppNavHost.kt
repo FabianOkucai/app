@@ -18,6 +18,7 @@ import net.ezra.ui.products.InsertProductScreen
 import net.ezra.ui.products.ProductDetailScreen
 import net.ezra.ui.products.ProductListScreen
 import net.ezra.ui.shop.ShopScreen
+import net.ezra.ui.students.Search
 
 @Composable
 fun AppNavHost(
@@ -84,6 +85,10 @@ fun AppNavHost(
 
         composable(ROUTE_DASHBOARD) {
             DashboardScreen(navController = navController)
+        }
+
+        composable(ROUTE_SEARCH) {
+            Search(navController)
         }
 
 

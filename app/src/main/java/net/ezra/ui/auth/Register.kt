@@ -110,7 +110,14 @@ fun SignUpScreen(navController: NavController, onSignUpSuccess: () -> Unit) {
                         error = "Passwords do not match"
                     } else {
                         isLoading = true
-                        // Replace with your sign-up logic
+                        signUp(email, password, {
+                            isLoading = false
+                            Toast.makeText(context, "Sign-up successful!", Toast.LENGTH_SHORT).show()
+                            onSignUpSuccess()
+                        }) { errorMessage ->
+                            isLoading = false
+                            error = errorMessage
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),

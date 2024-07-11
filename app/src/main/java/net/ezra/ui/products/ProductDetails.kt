@@ -9,11 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Scaffold
-//noinspection UsingMaterialAndMaterial3Libraries
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -28,14 +26,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 import net.ezra.navigation.ROUTE_VIEW_PRODUCTS
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+
+
 
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -55,15 +58,11 @@ fun ProductDetailScreen(navController: NavController, productId: String) {
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-
                     // Display the product name if available
-
                     Text(
-
-                        text = product?.name ?:"Details",
-                        fontSize = 20.sp,
+                        text = product?.name ?: "Details",
+                        fontSize = 30.sp,
                         color = Color.White
-
                     )
                 },
                 navigationIcon = {
@@ -90,21 +89,17 @@ fun ProductDetailScreen(navController: NavController, productId: String) {
                     .background(Color(0xff9AEDC9)),
             ) {
                 product?.let {
-                    Column(
-                        modifier = Modifier.padding(16.dp)
-                    ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Image(
                             painter = rememberAsyncImagePainter(it.imageUrl),
                             contentDescription = null,
                             modifier = Modifier.size(60.dp)
                         )
-                        Text(text = it.name,)
+                        Text(text = it.name, style = MaterialTheme.typography.h5)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = "Price: ${it.price}")
+                        Text(text = "Price: ${it.price}", style = MaterialTheme.typography.subtitle1)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(text = it.description)
-                        Spacer(modifier = Modifier.height(8.dp))
-
+                        Text(text = it.description, style = MaterialTheme.typography.body1)
                     }
                 }
             }
@@ -112,3 +107,24 @@ fun ProductDetailScreen(navController: NavController, productId: String) {
     )
 }
 
+
+suspend fun fetchProduct(productId: String): Product? {
+    val db = FirebaseFirestore.getInstance()
+    val productsCollection = db.collection("products")
+
+    return try {
+        val documentSnapshot = productsCollection.document(productId).get().await()
+        if (documentSnapshot.exists()) {
+            val productData = documentSnapshot.data ?: return null
+            Product(
+                id = productId,
+                name = productData["name"] as String,
+                // Add other product properties here
+            )
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        null
+    }
+}
